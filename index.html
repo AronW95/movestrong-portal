@@ -121,7 +121,7 @@ async function editchallenge(){const{data:c0}=await sb.from('challenges').select
  const cats=(cs||[]).map(x=>({...x})),gone=[],list=h('div'),msg=h('p',{class:'mut'},flash);flash='';
  const ti=h('input',{value:c.title}),de=h('textarea',{rows:2},c.description||''),da=h('input',{type:'number',min:'1',max:'60',value:c.days});
  const sel=k=>{const x=h('select',{onchange:e=>k.kind=e.target.value},h('option',{value:'check'},'Tick (done / not done)'),h('option',{value:'number'},'Number'));x.value=k.kind||'check';return x};
- const draw=()=>list.replaceChildren(cats.map((k,i)=>h('div',{class:'card'},h('div',{class:'grid'},
+ const draw=()=>list.replaceChildren(...cats.map((k,i)=>h('div',{class:'card'},h('div',{class:'grid'},
   h('div',{},h('label',{},'Category'),h('input',{value:k.name,placeholder:'e.g. Steps',oninput:e=>k.name=e.target.value})),h('div',{},h('label',{},'Type'),sel(k)),
   h('div',{},h('label',{},'Unit'),h('input',{value:k.unit||'',placeholder:'e.g. steps, L',oninput:e=>k.unit=e.target.value})),
   h('div',{},h('label',{},'Daily target'),h('input',{type:'number',step:'any',value:k.target??'',oninput:e=>k.target=e.target.value===''?null:+e.target.value}))),
