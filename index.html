@@ -2,101 +2,117 @@
 <title>MoveStrong Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
 <style>
-:root{--bg:#000;--card:#0d1214;--line:#1f2b2e;--fg:#f2f6f7;--mut:#8a9a9e;--c:#00D4E8}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 Barlow,sans-serif}
-h1,h2,h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;line-height:1.05;margin:0 0 .5em}
-h1{font-size:clamp(2.4rem,8vw,4rem)}h2{font-size:1.8rem}h3{font-size:1.25rem}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line)}
-.logo{font:700 1.6rem 'Barlow Condensed';letter-spacing:.02em}.logo b{color:var(--c)}
-main{max-width:680px;margin:0 auto;padding:28px 20px 80px}
-.card{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--c);padding:18px;margin:0 0 14px}
-label{display:block;margin:16px 0 6px;font-weight:500}
-input,textarea,select{width:100%;background:#000;color:var(--fg);border:1px solid var(--line);padding:11px;font:inherit;border-radius:0}
+:root{--card:#0d1214;--line:#1f2b2e;--fg:#f2f6f7;--mut:#8a9a9e;--c:#00D4E8}
+*{box-sizing:border-box}body{margin:0;background:#000;color:var(--fg);font:16px/1.55 Barlow,sans-serif}
+h1,h2,h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;line-height:1.05;margin:0 0 .5em}h1{font-size:2.6rem}h3{font-size:1.2rem}
+#shell{display:flex;min-height:100vh}aside{width:250px;border-right:1px solid var(--line);padding:22px 0;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.logo{font:700 1.7rem 'Barlow Condensed';padding:0 20px 18px}.logo b{color:var(--c)}
+aside a{padding:11px 20px;color:var(--mut);text-decoration:none;border-left:3px solid transparent}aside a.on{color:var(--fg);border-color:var(--c);background:var(--card)}
+.out{margin:auto 20px 0!important}main{flex:1;max-width:920px;padding:32px 28px 80px;min-width:0}
+.card{display:block;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--c);padding:16px;margin:0 0 12px;color:inherit;text-decoration:none}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:20px}.tiles .card{margin:0}
+.card b.big{display:block;font:700 2rem 'Barlow Condensed';color:var(--c)}
+label{display:block;margin:12px 0 5px;font-weight:500}input,textarea{width:100%;background:#000;color:var(--fg);border:1px solid var(--line);padding:10px;font:inherit;border-radius:0}
 input:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:2px solid var(--c);outline-offset:2px}
-button,.btn{background:var(--c);color:#000;border:0;padding:11px 20px;font:700 1rem 'Barlow Condensed';letter-spacing:.03em;cursor:pointer;text-decoration:none;display:inline-block;margin-top:14px}
-button.ghost{background:none;color:var(--c);border:1px solid var(--c)}button:disabled{opacity:.5}
-a{color:var(--c)}.mut{color:var(--mut)}.err{color:#ff7a7a}.row{display:flex;gap:8px;flex-wrap:wrap}
-.opt{border:1px solid var(--line);padding:9px 14px;cursor:pointer;background:#000;color:var(--fg);margin:0}.opt.on{border-color:var(--c);background:var(--c);color:#000}
-.days{display:flex;gap:6px;flex-wrap:wrap}.day{width:44px;height:44px;margin:0;padding:0}.day.done{background:var(--c);color:#000}
-.day.done{cursor:default}
-@media(prefers-reduced-motion:no-preference){main>*{animation:in .3s both}@keyframes in{from{opacity:0}}}
+button{background:var(--c);color:#000;border:0;padding:10px 18px;font:700 1rem 'Barlow Condensed';letter-spacing:.03em;cursor:pointer;margin-top:12px}
+button.ghost{background:none;color:var(--c);border:1px solid var(--c)}button:disabled{opacity:.45;cursor:default}
+a{color:var(--c)}.mut{color:var(--mut)}.err{color:#ff7a7a}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.opt{background:#000;color:var(--fg);border:1px solid var(--line);margin:0 8px 8px 0}.opt.on{background:var(--c);color:#000;border-color:var(--c)}
+.days{display:flex;gap:6px;flex-wrap:wrap}.day{width:44px;height:44px;padding:0;margin:0}.day.done{background:var(--c);color:#000;opacity:1}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 8px 8px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+.tabs{justify-content:flex-start;margin-bottom:18px}.tabs a{padding:6px 12px;border:1px solid var(--line);text-decoration:none;color:var(--mut)}.tabs a.on{border-color:var(--c);color:var(--fg)}
+@media(max-width:780px){#shell{flex-direction:column}aside{width:100%;height:auto;position:static;flex-direction:row;overflow-x:auto;padding:0;border:0;border-bottom:1px solid var(--line)}.logo{display:none}
+aside a{white-space:nowrap;border-left:0;border-bottom:3px solid transparent}.out{margin:0 12px!important;white-space:nowrap}main{padding:20px 16px 60px}}
 </style></head><body>
-<header><div class="logo"><b>MOVE</b>STRONG</div><nav id="nav"></nav></header><main id="app"></main>
-<script>addEventListener('error',e=>{const a=document.getElementById('app');a.textContent='Setup problem: '+e.message+(/token|string|identifier/i.test(e.message)?' (check the CFG line for curly quotes or a missing quote or comma)':'')});</script>
+<div id="shell"><aside id="side"></aside><main id="app"></main></div>
+<script>addEventListener('error',e=>{document.getElementById('app').textContent='Setup problem: '+e.message+(/token|string|identifier/i.test(e.message)?' (check config.js for curly quotes)':'')});</script>
 <script>
-const CFG={url:'https://emqebqugufovcqzralyy.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtcWVicXVndWZvdmNxenJhbHl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyNzcwNzgsImV4cCI6MjEwODg1MzA3OH0.32j2jTL0IUO0HJ40y4CBo_-ogPMfvu7fG7tljF0SLKI',hubSite:'HUB_URL'};
-const $=s=>document.querySelector(s),app=$('#app');
-if(typeof supabase==='undefined')throw new Error('The Supabase library did not load. Check your connection or ad blocker.');
-if(CFG.key.length<30||CFG.key.includes('PASTE'))throw new Error('Paste your Supabase anon key into the CFG line near the top of the script.');
-const sb=supabase.createClient(CFG.url,CFG.key);
-const h=(t,a={},...k)=>{const e=document.createElement(t);for(const[x,v]of Object.entries(a))x.startsWith('on')?e.addEventListener(x.slice(2),v):x==='class'?e.className=v:e.setAttribute(x,v);k.flat(Infinity).forEach(c=>e.append(c?.nodeType?c:(c??'')));return e};
-const show=(...n)=>{app.replaceChildren(...n.flat(Infinity).filter(x=>x!==''&&x!=null))};
-let me=null,profile=null;
-// Hub link: ?hub=<clientId> is remembered and saved to the account at sign-up
-const hubParam=new URLSearchParams(location.search).get('hub');if(hubParam)sessionStorage.setItem('hub',hubParam);
-
-async function boot(){const{data:{session}}=await sb.auth.getSession();me=session?.user||null;
- if(me){profile=(await sb.from('profiles').select('*').eq('id',me.id).single()).data;
-  if(sessionStorage.getItem('hub')&&profile&&!profile.hub_client_id){await sb.from('profiles').update({hub_client_id:sessionStorage.getItem('hub'),source:'client'}).eq('id',me.id)}}
- $('#nav').replaceChildren(...(me?[profile?.role==='coach'?h('a',{href:'#/coach'},'Coach view  '):'',h('button',{class:'ghost',style:'margin:0',onclick:async()=>{await sb.auth.signOut();location.hash='';boot()}},'Log out')]:[]));
- route()}
-sb.auth.onAuthStateChange((e)=>{if(e==='SIGNED_IN'&&!me)boot()});
-addEventListener('hashchange',route);
-
-function route(){const[,p,a]=location.hash.split('/');
- if(!me)return authView();
- if(p==='q')return questionnaire(a);if(p==='c')return challenge(a);if(p==='coach'&&profile?.role==='coach')return coach();home()}
-
+if(typeof CFG==='undefined')throw new Error('config.js is missing. Add it next to index.html.');
+if(CFG.key.includes('PASTE'))throw new Error('Paste your Supabase anon key into config.js.');
+const sb=supabase.createClient(CFG.url,CFG.key),$=s=>document.querySelector(s),app=$('#app'),side=$('#side');let root=app,me,profile;
+const h=(t,a={},...k)=>{const e=document.createElement(t);for(const[x,v]of Object.entries(a)){if(v===false||v==null)continue;x.startsWith('on')?e.addEventListener(x.slice(2),v):x==='class'?e.className=v:e.setAttribute(x,v===true?'':v)}k.flat(Infinity).forEach(c=>{if(c!==''&&c!=null&&c!==false)e.append(c)});return e};
+const show=(...n)=>root.replaceChildren(...n.flat(Infinity).filter(x=>x!==''&&x!=null&&x!==false)),D=d=>new Date(d).toLocaleDateString('en-GB');
+const hb=new URLSearchParams(location.search).get('hub');if(hb)sessionStorage.setItem('hub',hb);
+const MEMBER=[['home','Dashboard'],['questionnaire','Starter Questionnaire'],['challenge','Accountability Challenge'],['body','Body Composition'],['documents','Documents']];
+async function boot(){const{data:{session}}=await sb.auth.getSession();me=session?.user||null;profile=null;
+ if(me){profile=(await sb.from('profiles').select('*').eq('id',me.id).single()).data;const k=sessionStorage.getItem('hub');
+  if(k&&profile&&!profile.hub_client_id)await sb.from('profiles').update({hub_client_id:k,source:'client'}).eq('id',me.id)}route()}
+sb.auth.onAuthStateChange(e=>{if(e==='SIGNED_IN'&&!me)boot()});addEventListener('hashchange',route);
+function route(){root=app;side.style.display=me?'':'none';if(!me)return authView();
+ const coachOn=profile?.role==='coach',[,p='home',a,b]=location.hash.split('/'),nav=[...MEMBER,...(coachOn?[['coach','Clients']]:[])];
+ side.replaceChildren(h('div',{class:'logo'},h('b',{},'MOVE'),'STRONG'),nav.map(([k,l])=>h('a',{href:'#/'+k,class:p===k?'on':''},l)),h('button',{class:'ghost out',onclick:async()=>{await sb.auth.signOut();me=null;location.hash='';boot()}},'Log out'));
+ if(p==='coach'&&coachOn)return a?clientView(a,b||'questionnaire'):clients();(PAGES[p]||home)(me.id,false)}
 function authView(mode='up'){const msg=h('p',{class:'err'});
- const f=h('div',{},h('h1',{},mode==='up'?'Create your account':'Welcome back'),
-  h('p',{class:'mut'},'Your questionnaires and challenges are saved to your account, so you can come back any time.'),
-  mode==='up'?[h('label',{},'Name'),h('input',{id:'n',autocomplete:'name'})]:'',
-  h('label',{},'Email'),h('input',{id:'e',type:'email',autocomplete:'email'}),
+ show(h('div',{style:'max-width:440px;margin:0 auto'},h('div',{class:'logo',style:'padding:0 0 20px'},h('b',{},'MOVE'),'STRONG'),h('h1',{},mode==='up'?'Create your account':'Welcome back'),
+  h('p',{class:'mut'},'Your questionnaire, challenges, measurements and documents are saved to your account.'),
+  mode==='up'&&[h('label',{},'Name'),h('input',{id:'n',autocomplete:'name'})],h('label',{},'Email'),h('input',{id:'e',type:'email',autocomplete:'email'}),
   h('label',{},'Password (8+ characters)'),h('input',{id:'p',type:'password',autocomplete:mode==='up'?'new-password':'current-password'}),msg,
   h('button',{onclick:async()=>{const email=$('#e').value.trim(),password=$('#p').value;msg.textContent='';
    const r=mode==='up'?await sb.auth.signUp({email,password,options:{data:{full_name:$('#n').value.trim(),hub_client_id:sessionStorage.getItem('hub')}}}):await sb.auth.signInWithPassword({email,password});
-   if(r.error)msg.textContent=r.error.message;else if(mode==='up'&&!r.data.session)show(h('h2',{},'Check your email'),h('p',{},'Confirm your address, then log in.'))}},mode==='up'?'Create account':'Log in'),
-  h('p',{},mode==='up'?'Already registered? ':'New here? ',h('a',{href:'#',onclick:e=>{e.preventDefault();authView(mode==='up'?'in':'up')}},mode==='up'?'Log in':'Create an account')));
- show(f)}
+   if(r.error)msg.textContent=r.error.message;else if(mode==='up'&&!r.data.session)show(h('h1',{},'Check your email'),h('p',{},'Confirm your address, then log in.'))}},mode==='up'?'Create account':'Log in'),
+  h('p',{},mode==='up'?'Already registered? ':'New here? ',h('a',{href:'#',onclick:e=>{e.preventDefault();authView(mode==='up'?'in':'up')}},mode==='up'?'Log in':'Create an account'))))}
 
-async function home(){show(h('p',{class:'mut'},'Loading…'));
- const[{data:qs},{data:cs},{data:rs},{data:es}]=await Promise.all([sb.from('questionnaires').select('*').eq('active',true),sb.from('challenges').select('*').eq('active',true),sb.from('responses').select('questionnaire_id').eq('user_id',me.id),sb.from('enrolments').select('challenge_id').eq('user_id',me.id)]);
- const done=new Set(rs.map(r=>r.questionnaire_id)),joined=new Set(es.map(e=>e.challenge_id));
- show(h('h1',{},`Hi ${(profile?.full_name||'there').split(' ')[0]}`),
-  h('h2',{},'Questionnaires'),qs.map(q=>h('div',{class:'card'},h('h3',{},q.title),h('p',{class:'mut'},q.intro||''),h('a',{class:'btn',href:'#/q/'+q.slug},done.has(q.id)?'Retake':'Start'))),
-  h('h2',{},'Challenges'),cs.map(c=>h('div',{class:'card'},h('h3',{},c.title),h('p',{class:'mut'},c.description),h('a',{class:'btn',href:'#/c/'+c.id},joined.has(c.id)?'Open check-ins':'Join challenge'))),
-  profile?.hub_client_id?h('p',{class:'mut'},'Linked to your MoveStrong coaching account.'):'')}
+async function home(){show(h('p',{class:'mut'},'Loading…'));const q=t=>sb.from(t).select('*').eq('user_id',me.id);
+ const[r,c,b,d]=await Promise.all([q('responses'),q('checkins'),q('body_metrics').order('logged_on',{ascending:false}).limit(1),q('documents')]);
+ const t=(l,v,k)=>h('a',{class:'card',href:'#/'+k},h('span',{class:'mut'},l),h('b',{class:'big'},v));
+ show(h('h1',{},'Hi '+(profile?.full_name||'there').split(' ')[0]),h('div',{class:'tiles'},t('Starter questionnaire',r.data?.length?'Done':'To do','questionnaire'),t('Challenge check-ins',(c.data?.length||0)+' days','challenge'),
+  t('Latest weight',b.data?.[0]?.weight_kg?b.data[0].weight_kg+' kg':'–','body'),t('Documents',d.data?.length||0,'documents')))}
 
-async function questionnaire(slug){const{data:q}=await sb.from('questionnaires').select('*').eq('slug',slug).single();if(!q)return home();
- const ans={};const fields=q.questions.map(x=>{let el;
+let retake=0;
+async function questionnaire(uid,coach){const{data:q}=await sb.from('questionnaires').select('*').eq('slug','starter').single();if(!q)return show(h('p',{class:'err'},'Questionnaire not found.'));
+ const{data:rs}=await sb.from('responses').select('*').eq('user_id',uid).eq('questionnaire_id',q.id).order('created_at',{ascending:false}).limit(1),r=rs?.[0];
+ if(r&&(coach||!retake))return show(h('h1',{},q.title),h('p',{class:'mut'},'Completed '+D(r.created_at)),h('div',{class:'card'},q.questions.map(x=>h('p',{},h('b',{},x.label+' '),String(r.answers[x.id]??'–')))),!coach&&h('button',{onclick:()=>{retake=1;questionnaire(uid,0)}},'Retake'));
+ if(coach)return show(h('h1',{},q.title),h('p',{class:'mut'},'Not completed yet.'));
+ const ans={},msg=h('p',{class:'err'});
+ show(h('h1',{},q.title),h('p',{class:'mut'},q.intro||''),q.questions.map(x=>{let el;
   if(x.type==='textarea')el=h('textarea',{rows:3,oninput:e=>ans[x.id]=e.target.value});
-  else if(x.type==='scale'||x.type==='choice'){const opts=x.type==='scale'?Array.from({length:x.max-x.min+1},(_,i)=>String(x.min+i)):x.options;
-   el=h('div',{class:'row'},opts.map(o=>h('button',{class:'opt',onclick:e=>{ans[x.id]=o;[...e.target.parentNode.children].forEach(b=>b.classList.toggle('on',b===e.target))}},o)))}
-  else el=h('input',{oninput:e=>ans[x.id]=e.target.value});
-  return[h('label',{},x.label),el]});
- const msg=h('p',{class:'err'});
- show(h('h1',{},q.title),h('p',{class:'mut'},q.intro||''),fields,msg,h('button',{onclick:async e=>{
-  if(q.questions.some(x=>!ans[x.id]&&x.type!=='textarea')){msg.textContent='Answer every question except the optional text boxes.';return}
-  e.target.disabled=true;const{error}=await sb.from('responses').insert({user_id:me.id,questionnaire_id:q.id,answers:ans});
-  if(error){msg.textContent=error.message;e.target.disabled=false}else show(h('h1',{},'Thanks, got it'),h('p',{},'Your answers are saved to your account.'),h('a',{class:'btn',href:'#/home'},'Back to dashboard'))}},'Save answers'))}
+  else{const o=x.type==='scale'?Array.from({length:x.max-x.min+1},(_,i)=>String(x.min+i)):x.options;
+   el=h('div',{},o.map(v=>h('button',{class:'opt',onclick:e=>{ans[x.id]=v;[...e.target.parentNode.children].forEach(b=>b.classList.toggle('on',b===e.target))}},v)))}
+  return[h('label',{},x.label),el]}),msg,
+  h('button',{onclick:async e=>{if(q.questions.some(x=>!ans[x.id]&&x.type!=='textarea')){msg.textContent='Answer every question except the optional text boxes.';return}
+   e.target.disabled=true;const{error}=await sb.from('responses').insert({user_id:uid,questionnaire_id:q.id,answers:ans});
+   if(error){msg.textContent=error.message;e.target.disabled=false}else{retake=0;questionnaire(uid,0)}}},'Save answers'))}
 
-async function challenge(id){const{data:c}=await sb.from('challenges').select('*').eq('id',id).single();if(!c)return home();
- await sb.from('enrolments').upsert({user_id:me.id,challenge_id:id},{ignoreDuplicates:true});
- const{data:en}=await sb.from('enrolments').select('started_on').eq('user_id',me.id).eq('challenge_id',id).single();
- const{data:ck}=await sb.from('checkins').select('day').eq('user_id',me.id).eq('challenge_id',id);const done=new Set(ck.map(x=>x.day));
- const today=Math.floor((Date.now()-new Date(en.started_on+'T00:00:00'))/864e5)+1;
- const note=h('textarea',{rows:2,placeholder:'How did it go? (optional)'}),msg=h('p',{class:'mut'});
- show(h('h1',{},c.title),h('p',{class:'mut'},c.description),h('p',{},`${done.size} of ${c.days} days checked in`),
-  h('div',{class:'days'},Array.from({length:c.days},(_,i)=>i+1).map(d=>h('button',{class:'day'+(done.has(d)?' done':''),disabled:done.has(d)||d>today,onclick:async()=>{
-   const{error}=await sb.from('checkins').insert({user_id:me.id,challenge_id:id,day:d,note:note.value});if(error)msg.textContent=error.message;else challenge(id)}},d))),
-  h('label',{},'Note for the day you tap'),note,msg,h('p',{class:'mut'},'Tap a day to check in. Future days unlock as the challenge runs.'),h('a',{href:'#/home'},'Back to dashboard'))}
+async function challenge(uid,coach){const{data:c}=await sb.from('challenges').select('*').eq('active',true).limit(1).maybeSingle();
+ if(!c)return show(h('h1',{},'Accountability Challenge'),h('p',{class:'mut'},'No active challenge.'));
+ if(!coach)await sb.from('enrolments').upsert({user_id:uid,challenge_id:c.id},{ignoreDuplicates:true});
+ const{data:en}=await sb.from('enrolments').select('started_on').eq('user_id',uid).eq('challenge_id',c.id).maybeSingle();
+ const{data:ck}=await sb.from('checkins').select('day,note').eq('user_id',uid).eq('challenge_id',c.id).order('day');
+ const done=new Set(ck.map(x=>x.day)),today=en?Math.floor((Date.now()-new Date(en.started_on+'T00:00:00'))/864e5)+1:0,note=h('textarea',{rows:2,placeholder:'How did it go? (optional)'}),msg=h('p',{class:'err'});
+ show(h('h1',{},c.title),h('p',{class:'mut'},c.description),h('p',{},done.size+' of '+c.days+' days checked in'),
+  h('div',{class:'days'},Array.from({length:c.days},(_,i)=>i+1).map(d=>h('button',{class:'day'+(done.has(d)?' done':''),disabled:coach||done.has(d)||d>today,onclick:async()=>{
+   const{error}=await sb.from('checkins').insert({user_id:uid,challenge_id:c.id,day:d,note:note.value});error?msg.textContent=error.message:challenge(uid,coach)}},d))),
+  !coach&&[h('label',{},'Note for the day you tap'),note,h('p',{class:'mut'},'Tap a day to check in. Later days unlock as the challenge runs.')],msg,
+  ck.filter(x=>x.note).map(x=>h('div',{class:'card'},h('b',{},'Day '+x.day+': '),x.note)))}
 
-async function coach(){const{data:rs}=await sb.from('responses').select('*,questionnaires(title,questions),profiles:user_id(full_name,email,hub_client_id)').order('created_at',{ascending:false}).limit(50);
- const{data:ck}=await sb.from('checkins').select('user_id,challenge_id');const n={};ck.forEach(c=>n[c.user_id]=(n[c.user_id]||0)+1);
- show(h('h1',{},'Coach view'),h('p',{class:'mut'},'Latest questionnaire responses. The hub bridge pulls the same data.'),
-  rs.map(r=>h('div',{class:'card'},h('h3',{},`${r.profiles?.full_name||'Unnamed'} · ${r.questionnaires.title}`),
-   h('p',{class:'mut'},`${r.profiles?.email} · ${r.profiles?.hub_client_id?'client':'lead'} · ${n[r.user_id]||0} check-ins · ${new Date(r.created_at).toLocaleDateString('en-GB')}`),
-   r.questionnaires.questions.map(q=>h('p',{},h('b',{},q.label+' '),String(r.answers[q.id]??'–'))))))}
-boot();
+const F=[['weight_kg','Weight (kg)'],['body_fat_pct','Body fat (%)'],['chest_cm','Chest (cm)'],['waist_cm','Waist (cm)'],['hips_cm','Hips (cm)'],['arm_cm','Arm (cm)'],['thigh_cm','Thigh (cm)']];
+async function body(uid){const{data:rows}=await sb.from('body_metrics').select('*').eq('user_id',uid).order('logged_on').order('created_at');
+ const inp={},msg=h('p',{class:'err'}),date=h('input',{type:'date',value:new Date().toISOString().slice(0,10)}),L=rows.at(-1),f0=rows[0];
+ const dl=k=>{const a=rows.filter(r=>r[k]!=null);if(a.length<2)return'–';const d=a.at(-1)[k]-a[0][k];return(d>0?'+':'')+d.toFixed(1)};
+ const w=rows.filter(r=>r.weight_kg!=null).map(r=>+r.weight_kg);let chart='';
+ if(w.length>1){const mn=Math.min(...w),sp=Math.max(...w)-mn||1;chart=h('div',{class:'card'});
+  chart.innerHTML=`<svg viewBox="0 0 400 120" style="width:100%"><polyline fill="none" stroke="#00D4E8" stroke-width="2.5" points="${w.map((v,i)=>(10+i*380/(w.length-1))+','+(110-(v-mn)/sp*100)).join(' ')}"/></svg><span class="mut">Weight trend: ${mn} to ${Math.max(...w)} kg</span>`}
+ const latest=k=>[...rows].reverse().find(r=>r[k]!=null)?.[k];
+ show(h('h1',{},'Body Composition'),h('div',{class:'tiles'},[['Weight now (kg)',latest('weight_kg')??'–'],['Weight change (kg)',dl('weight_kg')],['Waist change (cm)',dl('waist_cm')]].map(([l,v])=>h('div',{class:'card'},h('span',{class:'mut'},l),h('b',{class:'big'},v)))),chart,
+  h('div',{class:'card'},h('h3',{},'Log measurements'),h('label',{},'Date'),date,h('div',{class:'grid'},F.map(([k,l])=>h('div',{},h('label',{},l),inp[k]=h('input',{type:'number',step:'0.1',min:'0',inputmode:'decimal'})))),msg,
+   h('button',{onclick:async()=>{const row={user_id:uid,logged_on:date.value};let n=0;F.forEach(([k])=>{if(inp[k].value!==''){row[k]=+inp[k].value;n++}});
+    if(!n){msg.textContent='Enter at least one measurement.';return}const{error}=await sb.from('body_metrics').insert(row);error?msg.textContent=error.message:body(uid)}},'Save')),
+  rows.length?h('div',{class:'scroll'},h('table',{},h('tr',{},h('th',{},'Date'),F.map(([,l])=>h('th',{},l))),[...rows].reverse().map(r=>h('tr',{},h('td',{},D(r.logged_on)),F.map(([k])=>h('td',{},r[k]??'–')))))):h('p',{class:'mut'},'No entries yet.'))}
+
+async function documents(uid,coach){const{data:ds}=await sb.from('documents').select('*').eq('user_id',uid).order('uploaded_at',{ascending:false}),msg=h('p',{class:'err'}),file=h('input',{type:'file',accept:'application/pdf'});
+ const open=async d=>{const w=window.open('');const{data,error}=await sb.storage.from('documents').createSignedUrl(d.path,300);if(error||!data){w&&w.close();msg.textContent=error?.message||'Could not open file'}else if(w)w.location=data.signedUrl;else location.href=data.signedUrl};
+ show(h('h1',{},'Documents'),coach&&h('div',{class:'card'},h('h3',{},'Upload a PDF to this account'),file,h('button',{onclick:async e=>{const f=file.files[0];if(!f||f.type!=='application/pdf'){msg.textContent='Choose a PDF file (10 MB max).';return}
+   e.target.disabled=true;const path=uid+'/'+Date.now()+'-'+f.name.replace(/[^\w.-]/g,'_');let r=await sb.storage.from('documents').upload(path,f,{contentType:'application/pdf'});
+   if(!r.error)r=await sb.from('documents').insert({user_id:uid,name:f.name,path});r.error?(msg.textContent=r.error.message,e.target.disabled=false):documents(uid,coach)}},'Upload')),msg,
+  ds.length?ds.map(d=>h('div',{class:'card row'},h('span',{},d.name+' · '+D(d.uploaded_at)),h('span',{},h('button',{class:'ghost',onclick:()=>open(d)},'Open'),coach&&h('button',{class:'ghost',style:'margin-left:8px',onclick:async()=>{await sb.storage.from('documents').remove([d.path]);await sb.from('documents').delete().eq('id',d.id);documents(uid,coach)}},'Delete')))):h('p',{class:'mut'},coach?'No documents yet.':'Documents your coach uploads will appear here.'))}
+
+async function clients(){const{data:ps}=await sb.from('profiles').select('*').eq('role','member').order('created_at',{ascending:false});
+ show(h('h1',{},'Clients'),h('p',{class:'mut'},'Everyone with an account. Open one to see their answers and upload documents.'),ps?.length?ps.map(p=>h('a',{class:'card',href:'#/coach/'+p.id},h('b',{},p.full_name||'Unnamed'),h('div',{class:'mut'},p.email+' · '+(p.hub_client_id?'client':'lead')+' · joined '+D(p.created_at)))):h('p',{class:'mut'},'No sign-ups yet.'))}
+async function clientView(uid,tab){const{data:p}=await sb.from('profiles').select('*').eq('id',uid).single(),sec=h('div');
+ show(h('h1',{},p?.full_name||'Client'),h('p',{class:'mut'},p?.email),h('div',{class:'row tabs'},h('a',{href:'#/coach'},'← All clients'),MEMBER.slice(1).map(([k,l])=>h('a',{href:`#/coach/${uid}/${k}`,class:k===tab?'on':''},l))),sec);
+ root=sec;(PAGES[tab]||questionnaire)(uid,true)}
+const PAGES={home,questionnaire,challenge,body,documents};boot();
 </script></body></html>
