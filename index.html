@@ -61,16 +61,17 @@ sb.auth.onAuthStateChange(e=>{if(e==='SIGNED_IN'&&!me)boot()});addEventListener(
 function route(){root=app;side.style.display=me?'':'none';if(!me)return authView();
  const coachOn=profile?.role==='coach',[,p='home',a,b]=location.hash.split('/'),nav=[...MEMBER,...(coachOn?[['coach','Clients']]:[])];
  const nm=profile?.full_name||me.email,ini=nm.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase(),lk=(k,l)=>h('a',{href:'#/'+k,class:p===k?'on':''},ic(k),l);
- side.replaceChildren(logo(),h('div',{class:'gl'},'Overview'),lk('home','Dashboard'),h('div',{class:'gl'},'My progress'),MEMBER.slice(1).map(([k,l])=>lk(k,l)),coachOn&&[h('div',{class:'gl'},'Manage'),lk('coach','Clients')],
+ const put=(...n)=>side.replaceChildren(...n.flat(Infinity).filter(Boolean));
+ put(logo(),h('div',{class:'gl'},'Overview'),lk('home','Dashboard'),h('div',{class:'gl'},'My progress'),MEMBER.slice(1).map(([k,l])=>lk(k,l)),coachOn&&[h('div',{class:'gl'},'Manage'),lk('coach','Clients')],
   h('div',{class:'me'},h('span',{class:'av'},ini),h('div',{},h('b',{},nm),h('div',{class:'mut'},me.email)),h('button',{class:'ghost sm',onclick:async()=>{await sb.auth.signOut();me=null;location.hash='';boot()}},'Log out')));
  if(p==='coach'&&coachOn)return a?clientView(a,b||'questionnaire'):clients();(PAGES[p]||home)(me.id,false)}
 function authView(mode='up'){const msg=h('p',{class:'err'});
  show(h('div',{style:'max-width:440px;margin:0 auto'},logo(),h('h1',{},mode==='up'?'Create your account':'Welcome back'),
   h('p',{class:'mut'},'Your questionnaire, challenges, measurements and documents are saved to your account.'),
-  mode==='up'&&[h('label',{},'Name'),h('input',{id:'n',autocomplete:'name'})],h('label',{},'Email'),h('input',{id:'e',type:'email',autocomplete:'email'}),
+  mode==='up'&&[h('label',{},'Name'),h('input',{id:'n',autocomplete:'name'}),h('label',{},'Phone number'),h('input',{id:'ph',type:'tel',autocomplete:'tel',placeholder:'07123 456789'}),h('p',{class:'mut',style:'font-size:.85rem;margin:6px 0 0'},'We will use your number to get in touch about your coaching enquiry.')],h('label',{},'Email'),h('input',{id:'e',type:'email',autocomplete:'email'}),
   h('label',{},'Password (8+ characters)'),h('input',{id:'p',type:'password',autocomplete:mode==='up'?'new-password':'current-password'}),msg,
-  h('button',{onclick:async()=>{const email=$('#e').value.trim(),password=$('#p').value;msg.textContent='';
-   const r=mode==='up'?await sb.auth.signUp({email,password,options:{data:{full_name:$('#n').value.trim(),hub_client_id:sessionStorage.getItem('hub')}}}):await sb.auth.signInWithPassword({email,password});
+  h('button',{onclick:async()=>{const email=$('#e').value.trim(),password=$('#p').value;msg.textContent='';if(mode==='up'&&($('#n').value.trim().length<2||$('#ph').value.replace(/\D/g,'').length<9)){msg.textContent='Please enter your name and a valid phone number.';return}
+   const r=mode==='up'?await sb.auth.signUp({email,password,options:{data:{full_name:$('#n').value.trim(),phone:$('#ph').value.trim(),hub_client_id:sessionStorage.getItem('hub')}}}):await sb.auth.signInWithPassword({email,password});
    if(r.error)msg.textContent=r.error.message;else if(mode==='up'&&!r.data.session)show(h('h1',{},'Check your email'),h('p',{},'Confirm your address, then log in.'))}},mode==='up'?'Create account':'Log in'),
   h('p',{},mode==='up'?'Already registered? ':'New here? ',h('a',{href:'#',onclick:e=>{e.preventDefault();authView(mode==='up'?'in':'up')}},mode==='up'?'Log in':'Create an account'))))}
 
@@ -78,7 +79,7 @@ async function home(){show(h('p',{class:'mut'},'Loading…'));const q=t=>sb.from
  const[r,c,b,d,ps]=await Promise.all([q('responses'),q('checkins'),q('body_metrics').order('logged_on',{ascending:false}).limit(1),q('documents'),isC?sb.from('profiles').select('*').eq('role','member').order('created_at',{ascending:false}):{data:[]}]);
  const t=(l,v,k)=>h('a',{class:'card tile',href:'#/'+k},h('span',{class:'lb'},l),h('b',{class:'big'},v)),pl=ps.data||[],leads=pl.filter(x=>!x.hub_client_id).length;
  show(h('h1',{},'Dashboard'),isC&&[h('div',{class:'tiles'},t('Sign-ups',pl.length,'coach'),t('Leads',leads,'coach'),t('Linked clients',pl.length-leads,'coach')),
-  h('div',{class:'card'},h('div',{class:'row'},h('h3',{},'Recent sign-ups'),h('a',{href:'#/coach'},'View all')),pl.length?pl.slice(0,5).map(x=>h('div',{class:'li'},h('div',{},h('b',{},x.full_name||'Unnamed'),h('div',{class:'mut'},x.email)),h('span',{class:'pill'},x.hub_client_id?'Client':'Lead'))):h('p',{class:'mut'},'No sign-ups yet.')),h('h3',{class:'sec'},'Your own progress')],
+  h('div',{class:'card'},h('div',{class:'row'},h('h3',{},'Recent sign-ups'),h('a',{href:'#/coach'},'View all')),pl.length?pl.slice(0,5).map(x=>h('div',{class:'li'},h('div',{},h('b',{},x.full_name||'Unnamed'),h('div',{class:'mut'},x.email+(x.phone?' · '+x.phone:''))),h('span',{class:'pill'},x.hub_client_id?'Client':'Lead'))):h('p',{class:'mut'},'No sign-ups yet.')),h('h3',{class:'sec'},'Your own progress')],
   h('div',{class:'tiles'},t('Starter questionnaire',r.data?.length?'Done':'To do','questionnaire'),t('Challenge check-ins',(c.data?.length||0)+' days','challenge'),t('Latest weight',b.data?.[0]?.weight_kg?b.data[0].weight_kg+' kg':'–','body'),t('Documents',d.data?.length||0,'documents')))}
 
 let retake=0;
@@ -130,9 +131,9 @@ async function documents(uid,coach){const{data:ds}=await sb.from('documents').se
   ds.length?ds.map(d=>h('div',{class:'card row'},h('span',{},d.name+' · '+D(d.uploaded_at)),h('span',{},h('button',{class:'ghost',onclick:()=>open(d)},'Open'),coach&&h('button',{class:'ghost',style:'margin-left:8px',onclick:async()=>{await sb.storage.from('documents').remove([d.path]);await sb.from('documents').delete().eq('id',d.id);documents(uid,coach)}},'Delete')))):h('p',{class:'mut'},coach?'No documents yet.':'Documents your coach uploads will appear here.'))}
 
 async function clients(){const{data:ps}=await sb.from('profiles').select('*').eq('role','member').order('created_at',{ascending:false});
- show(h('h1',{},'Clients'),h('p',{class:'mut'},'Everyone with an account. Open one to see their answers and upload documents.'),ps?.length?ps.map(p=>h('a',{class:'card',href:'#/coach/'+p.id},h('b',{},p.full_name||'Unnamed'),h('div',{class:'mut'},p.email+' · '+(p.hub_client_id?'client':'lead')+' · joined '+D(p.created_at)))):h('p',{class:'mut'},'No sign-ups yet.'))}
+ show(h('h1',{},'Clients'),h('p',{class:'mut'},'Everyone with an account. Open one to see their answers and upload documents.'),ps?.length?ps.map(p=>h('a',{class:'card',href:'#/coach/'+p.id},h('b',{},p.full_name||'Unnamed'),h('div',{class:'mut'},p.email+(p.phone?' · '+p.phone:'')+' · '+(p.hub_client_id?'client':'lead')+' · joined '+D(p.created_at)))):h('p',{class:'mut'},'No sign-ups yet.'))}
 async function clientView(uid,tab){const{data:p}=await sb.from('profiles').select('*').eq('id',uid).single(),sec=h('div');
- show(h('h1',{},p?.full_name||'Client'),h('p',{class:'mut'},p?.email),h('div',{class:'row tabs'},h('a',{href:'#/coach'},'← All clients'),MEMBER.slice(1).map(([k,l])=>h('a',{href:`#/coach/${uid}/${k}`,class:k===tab?'on':''},l))),sec);
+ show(h('h1',{},p?.full_name||'Client'),h('p',{class:'mut'},p?.email+(p?.phone?' · '+p.phone:'')),h('div',{class:'row tabs'},h('a',{href:'#/coach'},'← All clients'),MEMBER.slice(1).map(([k,l])=>h('a',{href:`#/coach/${uid}/${k}`,class:k===tab?'on':''},l))),sec);
  root=sec;(PAGES[tab]||questionnaire)(uid,true)}
 const PAGES={home,questionnaire,challenge,body,documents};boot();
 </script></body></html>
