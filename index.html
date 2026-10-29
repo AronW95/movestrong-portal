@@ -25,7 +25,7 @@ a.tile:hover{border-color:var(--c)}.sec{margin:26px 0 12px}
 .li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
 .pill{border:1px solid #2c4a50;border-radius:99px;padding:3px 12px;font-size:.85rem;color:var(--c);background:#16262a}
 label{display:block;margin:12px 0 5px;font-weight:500}
-input,textarea{width:100%;background:#111;color:var(--fg);border:1px solid var(--line);padding:10px 12px;font:inherit;border-radius:10px}
+input,textarea,select{width:100%;background:#111;color:var(--fg);border:1px solid var(--line);padding:10px 12px;font:inherit;border-radius:10px}
 input:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:2px solid var(--c);outline-offset:2px}
 button{background:var(--c);color:#0a0a0a;border:0;border-radius:10px;padding:10px 18px;font:600 1rem Barlow;cursor:pointer;margin-top:12px}
 button.ghost{background:none;color:var(--c);border:1px solid var(--c)}button.sm{padding:5px 10px;margin:0;font-size:.8rem}button:disabled{opacity:.45;cursor:default}
@@ -51,7 +51,7 @@ const hb=new URLSearchParams(location.search).get('hub');if(hb)sessionStorage.se
 const MEMBER=[['home','Dashboard'],['questionnaire','Starter Questionnaire'],['challenge','Accountability Challenge'],['body','Body Composition'],['documents','Documents']];
 const I={home:'<rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>',
 questionnaire:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>',challenge:'<path d="M5 21V4h11l-2 4 2 4H5"/>',body:'<path d="M3 12h4l3-8 4 16 3-8h4"/>',
-documents:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',coach:'<circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2 .7 3 2.6 3 6"/>'};
+documents:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',editchallenge:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',coach:'<circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2 .7 3 2.6 3 6"/>'};
 const ic=k=>{const e=h('span',{class:'ic'});e.innerHTML=`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${I[k]}</svg>`;return e};
 const logo=()=>h('div',{class:'logo'},'MOVE',h('b',{},'STRONG'),h('small',{},'Client portal'));
 async function boot(){const{data:{session}}=await sb.auth.getSession();me=session?.user||null;profile=null;
@@ -62,9 +62,9 @@ function route(){root=app;side.style.display=me?'':'none';if(!me)return authView
  const coachOn=profile?.role==='coach',[,p='home',a,b]=location.hash.split('/'),nav=[...MEMBER,...(coachOn?[['coach','Clients']]:[])];
  const nm=profile?.full_name||me.email,ini=nm.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase(),lk=(k,l)=>h('a',{href:'#/'+k,class:p===k?'on':''},ic(k),l);
  const put=(...n)=>side.replaceChildren(...n.flat(Infinity).filter(Boolean));
- put(logo(),h('div',{class:'gl'},'Overview'),lk('home','Dashboard'),h('div',{class:'gl'},'My progress'),MEMBER.slice(1).map(([k,l])=>lk(k,l)),coachOn&&[h('div',{class:'gl'},'Manage'),lk('coach','Clients')],
+ put(logo(),h('div',{class:'gl'},'Overview'),lk('home','Dashboard'),h('div',{class:'gl'},'My progress'),MEMBER.slice(1).map(([k,l])=>lk(k,l)),coachOn&&[h('div',{class:'gl'},'Manage'),lk('coach','Clients'),lk('editchallenge','Edit challenge')],
   h('div',{class:'me'},h('span',{class:'av'},ini),h('div',{},h('b',{},nm),h('div',{class:'mut'},me.email)),h('button',{class:'ghost sm',onclick:async()=>{await sb.auth.signOut();me=null;location.hash='';boot()}},'Log out')));
- if(p==='coach'&&coachOn)return a?clientView(a,b||'questionnaire'):clients();(PAGES[p]||home)(me.id,false)}
+ if(p==='coach'&&coachOn)return a?clientView(a,b||'questionnaire'):clients();if(p==='editchallenge'&&!coachOn)return home();(PAGES[p]||home)(me.id,false)}
 function authView(mode='up'){const msg=h('p',{class:'err'});
  show(h('div',{style:'max-width:440px;margin:0 auto'},logo(),h('h1',{},mode==='up'?'Create your account':'Welcome back'),
   h('p',{class:'mut'},'Your questionnaire, challenges, measurements and documents are saved to your account.'),
@@ -98,16 +98,45 @@ async function questionnaire(uid,coach){const{data:q}=await sb.from('questionnai
    if(error){msg.textContent=error.message;e.target.disabled=false}else{retake=0;questionnaire(uid,0)}}},'Save answers'))}
 
 async function challenge(uid,coach){const{data:c}=await sb.from('challenges').select('*').eq('active',true).limit(1).maybeSingle();
- if(!c)return show(h('h1',{},'Accountability Challenge'),h('p',{class:'mut'},'No active challenge.'));
+ if(!c)return show(h('h1',{},'Accountability Challenge'),h('p',{class:'mut'},'No active challenge yet.'));
  if(!coach)await sb.from('enrolments').upsert({user_id:uid,challenge_id:c.id},{ignoreDuplicates:true});
- const{data:en}=await sb.from('enrolments').select('started_on').eq('user_id',uid).eq('challenge_id',c.id).maybeSingle();
- const{data:ck}=await sb.from('checkins').select('day,note').eq('user_id',uid).eq('challenge_id',c.id).order('day');
- const done=new Set(ck.map(x=>x.day)),today=en?Math.floor((Date.now()-new Date(en.started_on+'T00:00:00'))/864e5)+1:0,note=h('textarea',{rows:2,placeholder:'How did it go? (optional)'}),msg=h('p',{class:'err'});
+ const[{data:cats},{data:en},{data:ck}]=await Promise.all([sb.from('challenge_categories').select('*').eq('challenge_id',c.id).order('sort'),sb.from('enrolments').select('started_on').eq('user_id',uid).eq('challenge_id',c.id).maybeSingle(),sb.from('checkins').select('day,note,results').eq('user_id',uid).eq('challenge_id',c.id).order('day')]);
+ const done=new Set(ck.map(x=>x.day)),today=en?Math.floor((Date.now()-new Date(en.started_on+'T00:00:00'))/864e5)+1:0,box=h('div'),msg=h('p',{class:'err'});
+ const fmt=(k,v)=>k.kind==='check'?(v?'✓':'–'):(v==null||v===''?'–':v+(k.unit?' '+k.unit:''));
+ const open=d=>{const val={},note=h('textarea',{rows:2,placeholder:'How did it go? (optional)'});
+  box.replaceChildren(h('div',{class:'card'},h('h3',{},'Day '+d),cats.map(k=>k.kind==='check'?h('button',{class:'opt',onclick:e=>{val[k.id]=!val[k.id];e.target.classList.toggle('on',val[k.id])}},k.name):
+   [h('label',{},k.name+(k.unit?' ('+k.unit+')':'')+(k.target?' · target '+k.target:'')),h('input',{type:'number',step:'any',inputmode:'decimal',oninput:e=>val[k.id]=e.target.value===''?null:+e.target.value})]),
+   h('label',{},'Note'),note,msg,h('button',{onclick:async e=>{e.target.disabled=true;const{error}=await sb.from('checkins').insert({user_id:uid,challenge_id:c.id,day:d,note:note.value,results:val});error?(msg.textContent=error.message,e.target.disabled=false):challenge(uid,coach)}},'Save check-in')))};
+ const avg=k=>{const n=ck.map(x=>x.results?.[k.id]).filter(v=>v!=null);return n.length?(n.reduce((a,b)=>a+b,0)/n.length).toFixed(1)+(k.unit?' '+k.unit:''):'–'};
  show(h('h1',{},c.title),h('p',{class:'mut'},c.description),h('p',{},done.size+' of '+c.days+' days checked in'),
-  h('div',{class:'days'},Array.from({length:c.days},(_,i)=>i+1).map(d=>h('button',{class:'day'+(done.has(d)?' done':''),disabled:coach||done.has(d)||d>today,onclick:async()=>{
-   const{error}=await sb.from('checkins').insert({user_id:uid,challenge_id:c.id,day:d,note:note.value});error?msg.textContent=error.message:challenge(uid,coach)}},d))),
-  !coach&&[h('label',{},'Note for the day you tap'),note,h('p',{class:'mut'},'Tap a day to check in. Later days unlock as the challenge runs.')],msg,
-  ck.filter(x=>x.note).map(x=>h('div',{class:'card'},h('b',{},'Day '+x.day+': '),x.note)))}
+  h('div',{class:'days'},Array.from({length:c.days},(_,i)=>i+1).map(d=>h('button',{class:'day'+(done.has(d)?' done':''),disabled:coach||done.has(d)||d>today,onclick:()=>open(d)},d))),
+  !coach&&h('p',{class:'mut'},'Tap a day to check in. Later days unlock as the challenge runs.'),box,
+  ck.length>0&&[cats.length>0&&[h('h3',{class:'sec'},'Summary'),h('div',{class:'tiles'},cats.map(k=>h('div',{class:'card'},h('span',{class:'lb'},k.name),h('b',{class:'big'},k.kind==='check'?ck.filter(x=>x.results?.[k.id]).length+'/'+ck.length:avg(k)),h('span',{class:'mut'},k.kind==='check'?'days ticked':'daily average'))))],
+   h('h3',{class:'sec'},'Check-ins'),ck.map(x=>h('div',{class:'card'},h('b',{},'Day '+x.day),cats.map(k=>h('div',{class:'mut'},k.name+': '+fmt(k,x.results?.[k.id]))),x.note&&h('div',{},x.note)))])}
+
+let flash='';
+const PRE=[['Steps','number','steps',10000],['Water','number','L',2],['Sleep','number','hours',7],['Hit protein target','check'],['Trained today','check']];
+async function editchallenge(){const{data:c0}=await sb.from('challenges').select('*').eq('active',true).limit(1).maybeSingle(),c=c0||{title:'',description:'',days:7};
+ const{data:cs}=c0?await sb.from('challenge_categories').select('*').eq('challenge_id',c.id).order('sort'):{data:[]};
+ const cats=(cs||[]).map(x=>({...x})),gone=[],list=h('div'),msg=h('p',{class:'mut'},flash);flash='';
+ const ti=h('input',{value:c.title}),de=h('textarea',{rows:2},c.description||''),da=h('input',{type:'number',min:'1',max:'60',value:c.days});
+ const sel=k=>{const x=h('select',{onchange:e=>k.kind=e.target.value},h('option',{value:'check'},'Tick (done / not done)'),h('option',{value:'number'},'Number'));x.value=k.kind||'check';return x};
+ const draw=()=>list.replaceChildren(cats.map((k,i)=>h('div',{class:'card'},h('div',{class:'grid'},
+  h('div',{},h('label',{},'Category'),h('input',{value:k.name,placeholder:'e.g. Steps',oninput:e=>k.name=e.target.value})),h('div',{},h('label',{},'Type'),sel(k)),
+  h('div',{},h('label',{},'Unit'),h('input',{value:k.unit||'',placeholder:'e.g. steps, L',oninput:e=>k.unit=e.target.value})),
+  h('div',{},h('label',{},'Daily target'),h('input',{type:'number',step:'any',value:k.target??'',oninput:e=>k.target=e.target.value===''?null:+e.target.value}))),
+  h('button',{class:'ghost sm',style:'margin-top:12px',onclick:()=>{if(k.id)gone.push(k.id);cats.splice(i,1);draw()}},'Remove'))));draw();
+ show(h('h1',{},'Edit challenge'),h('p',{class:'mut'},'Changes show up for everyone straight away. Past check-ins are kept.'),
+  h('div',{class:'card'},h('label',{},'Title'),ti,h('label',{},'Description'),de,h('label',{},'Length (days)'),da),
+  h('h3',{class:'sec'},'What people track'),list,h('div',{},h('span',{class:'mut'},'Quick add: '),PRE.map(([name,kind,unit,target])=>h('button',{class:'opt',onclick:()=>{cats.push({name,kind,unit,target});draw()}},name))),
+  h('button',{class:'ghost',onclick:()=>{cats.push({name:'',kind:'check'});draw()}},'+ Add custom category'),msg,
+  h('button',{onclick:async e=>{e.target.disabled=true;msg.className='err';msg.textContent='';
+   try{let id=c0?.id;const row={title:ti.value.trim(),description:de.value.trim(),days:+da.value||7,active:true};if(!row.title)throw new Error('Give the challenge a title.');
+    if(cats.some(k=>!(k.name||'').trim()))throw new Error('Every category needs a name.');
+    if(id){const r=await sb.from('challenges').update(row).eq('id',id);if(r.error)throw r.error}else{const r=await sb.from('challenges').insert(row).select().single();if(r.error)throw r.error;id=r.data.id}
+    if(gone.length){const r=await sb.from('challenge_categories').delete().in('id',gone);if(r.error)throw r.error}
+    for(const[i,k]of cats.entries()){const o={challenge_id:id,name:k.name.trim(),kind:k.kind||'check',unit:k.unit||null,target:k.target??null,sort:i};const r=k.id?await sb.from('challenge_categories').update(o).eq('id',k.id):await sb.from('challenge_categories').insert(o);if(r.error)throw r.error}
+    flash='Saved.';editchallenge()}catch(x){msg.textContent=x.message;e.target.disabled=false}}},'Save challenge'))}
 
 const F=[['weight_kg','Weight (kg)'],['body_fat_pct','Body fat (%)'],['chest_cm','Chest (cm)'],['waist_cm','Waist (cm)'],['hips_cm','Hips (cm)'],['arm_cm','Arm (cm)'],['thigh_cm','Thigh (cm)']];
 async function body(uid){const{data:rows}=await sb.from('body_metrics').select('*').eq('user_id',uid).order('logged_on').order('created_at');
@@ -135,5 +164,5 @@ async function clients(){const{data:ps}=await sb.from('profiles').select('*').eq
 async function clientView(uid,tab){const{data:p}=await sb.from('profiles').select('*').eq('id',uid).single(),sec=h('div');
  show(h('h1',{},p?.full_name||'Client'),h('p',{class:'mut'},p?.email+(p?.phone?' · '+p.phone:'')),h('div',{class:'row tabs'},h('a',{href:'#/coach'},'← All clients'),MEMBER.slice(1).map(([k,l])=>h('a',{href:`#/coach/${uid}/${k}`,class:k===tab?'on':''},l))),sec);
  root=sec;(PAGES[tab]||questionnaire)(uid,true)}
-const PAGES={home,questionnaire,challenge,body,documents};boot();
+const PAGES={home,questionnaire,challenge,body,documents,editchallenge};boot();
 </script></body></html>
