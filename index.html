@@ -25,7 +25,7 @@ a{color:var(--c)}.mut{color:var(--mut)}.err{color:#ff7a7a}.row{display:flex;gap:
 <header><div class="logo"><b>MOVE</b>STRONG</div><nav id="nav"></nav></header><main id="app"></main>
 <script>addEventListener('error',e=>{const a=document.getElementById('app');a.textContent='Setup problem: '+e.message+(/token|string|identifier/i.test(e.message)?' (check the CFG line for curly quotes or a missing quote or comma)':'')});</script>
 <script>
-const CFG={url:'https://emqebqugufovcqzralyy.supabase.co',key:'PASTE_ANON_KEY_HERE',hubSite:'HUB_URL'};
+const CFG={url:'https://emqebqugufovcqzralyy.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtcWVicXVndWZvdmNxenJhbHl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyNzcwNzgsImV4cCI6MjEwODg1MzA3OH0.32j2jTL0IUO0HJ40y4CBo_-ogPMfvu7fG7tljF0SLKI',hubSite:'HUB_URL'};
 const $=s=>document.querySelector(s),app=$('#app');
 if(typeof supabase==='undefined')throw new Error('The Supabase library did not load. Check your connection or ad blocker.');
 if(CFG.key.length<30||CFG.key.includes('PASTE'))throw new Error('Paste your Supabase anon key into the CFG line near the top of the script.');
